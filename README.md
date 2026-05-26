@@ -6,7 +6,7 @@ I haven't found any working drivers or patches from even the community, so I dec
 
 This also serves as a compatability guide for other PT14-52T laptops since there were many things that did not work out of the box (but had community patches or workarounds!)
 ## Usage:
-Change the r, g, and b variables in clrcontrol.py and run (very crude but will change)
+Change the r, g, and b variables in clrchange.py and run (very crude but will change)
 ## Road Map/Future Plans
 - [ ] Support modes other than static
 - [ ] Speed control for other modes
