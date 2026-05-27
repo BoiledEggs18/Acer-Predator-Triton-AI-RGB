@@ -6,13 +6,13 @@ I haven't found any working drivers or patches from even the community, so I dec
 
 This also serves as a compatability guide for other PT14-52T laptops since there were many things that did not work out of the box (but had community patches or workarounds!)
 ## Usage:
-Change the r, g, and b variables in clrchange.py and run (very crude but will change)
+Change the r, g, and b variables in clrchange.py to desired values **in hex format** and run (very crude but will change)
 ## Road Map/Future Plans
 - [ ] Support modes other than static
 - [ ] Speed control for other modes
-- [ ] Brightness control within app
+- [ ] Brightness control within the app
 - [ ] Support individual keys
 - [ ] Make this a kernel module (so rgb can turn off/on from sleep/wake events)
 - [ ] Make this easier to control (gui or tui maybe)
 - [ ] Support changing the lights found on the touchpad 
-- [ ] Support (really integrate) all other rgb lights found elsewhere (there already exists support from [Linuwu-Sense](https://github.com/0x7375646F/Linuwu-Sense), but  
+- [ ] Support (really integrate) all other rgb lights found elsewhere (there already exists slightly broken support from [acer-lighting-daemon](https://github.com/fcrespo82/acer-lighting-daemon), but i may have to fix it, and I will attempt to include controls for it
