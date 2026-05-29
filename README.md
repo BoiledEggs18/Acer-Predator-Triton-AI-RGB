@@ -1,10 +1,12 @@
 # Acer Predator Triton AI RGB Reverse Engineering
 ## Background
+Currently, this repo serves as my documentation of Acer's Keyboard RGB protocal which was found by reverse engineering. This also serves as a proof of concept for other laptops and **WILL** be developed into an app later.
+
 This was all tested with an Acer Predator Triton 14 AI (PT14-52T) under Fedora Linux 44, but it should work across distros since it only uses HID calls, which also means that this works without super user privileges!
 
 RGB is (officially) supported on Windows 11 only, so there are several unsupported features under Linux. [Jafar Akhondali](https://github.com/JafarAkhondali/acer-predator-turbo-and-rgb-keyboard-linux-module), [0x7375646](https://github.com/0x7375646F/Linuwu-Sense), and [fcrespo82](https://github.com/fcrespo82/acer-lighting-daemon) attempt so solve these issues, but they do not fully support this laptop, so I decided to make my own project that aims to support it. 
 
-This also serves as a compatability guide for other PT14-52T laptops since there were many things that did not work out of the box (but had community patches or workarounds!)
+This will also serve as a compatability guide for other PT14-52T laptops since there is many things that did not work out of the box (but had community patches or workarounds!)
 
 ---
 
@@ -19,7 +21,7 @@ To send the packets, I am using the hid module from Python and using the ```send
 
 It seems that the controller will only apply these changes if the checksums match their own internal algorithms, but I've derived the algorithm through packet analysis.
 
-Sometimes, I need to clear the previous modes for it to change, and they are also listed below; these were pulled direcltly from wireshark.
+Sometimes, I need to clear the previous modes for it to change, and they are also listed below; these were pulled directly from Wireshark.
 
 It seems the keyboard is the only thing that uses USB HID to control RGB, but since it is HID, there is no root access needed! The modes I have found are listed below.
 
@@ -82,7 +84,7 @@ Off:        ```30 01 00 00 00 00 00 ce```
 
 ## Quirks:
 
-Brightness higher than ```32```, or 50 in decimal format, will change the colors in very funny ways. It is extremely similar to how Tetris on the NES will shift colors after a certain amount of levels--possibly from the same reason?? 
+Brightness higher than ```32```, or 50 in decimal format, will change the colors in very funny ways. It is extremely similar to how Tetris on the NES will shift colors after a certain amount of levels, but it is not caused the same way ):
 
 ---
 
