@@ -23,6 +23,12 @@ Sometimes, I need to clear the previous modes for it to change, and they are als
 
 It seems the keyboard is the only thing that uses USB HID to control RGB, but since it is HID, there is no root access needed! The modes I have found are listed below.
 
+---
+
+**Universal Checksum Value:** ```(0xFF - (sum(packett[:7]) & 0xFF)) & 0xFF```
+If not correct, the keyboard will go black. I've included simplified formulas for each type of mode
+
+---
 
  ## BYTES TO CLEAR PREVIOUS MODES
    ```
