@@ -15,79 +15,72 @@ This will also serve as a compatability guide for other PT14-52T laptops since t
 
 ## General impressions
 
-Without this control, the RGB on the keyboard defaults to the wave mode, and turns off after 30 seconds. Listed below are the packets that I have found to control the RGB on the keyboard only.
+Without this control, the RGB on the keyboard defaults to the wave mode, and turns off after 30 seconds. The documentation found after this section are the packets that I have found to control the RGB on the **keyboard only**.
 
-To send the packets, I am using the hid module from Python and using the ```send_feature_report``` function to send these bytes. I found what device to apply this to by running ```hid.enumerate()``` in Python, then sending control commands to each device and looking for changes; for me, this was the last device printed by this command.
+To send the packets, I am using the hid module from Python and using the ```send_feature_report``` or ```write()``` function to send these bytes. I found what device to apply this to by running ```hid.enumerate()``` in Python, then sending control commands to each device and looking for changes; for me, this was the last device printed by this command. 
 
-It seems that the controller will only apply these changes if the checksums match their own internal algorithms, but I've derived the algorithm through packet analysis.
+When sending packets, each packet requires a leading zero byte, which can be sent with ```[0] + YOUR_PACKET_HERE```. If the leading byte is unsent, the keyboard will not respond. Similarly, every packet requires a valid checksum, and it always the last byte in each packet. The checksum formula is also found within this documentation.
 
-Sometimes, I need to clear the previous modes for it to change, and they are also listed below; these were pulled directly from Wireshark.
+Sometimes, the controller needs to clear the previous modes for it to change. During my extensive testing, I was unable to reliably repicate the conditions where this was necessary, but I have found the most success when repeatedly inputting incorrect modes or wrong checksums, but it was never 100%. The packets in question were pulled directly from Wireshark.
 
 It seems the keyboard is the only thing that uses USB HID to control RGB, but since it is HID, there is no root access needed! The modes I have found are listed below.
 
 ---
 
-**Universal Checksum Value:** ```(0xFF - (sum(packett[:7]) & 0xFF)) & 0xFF```
+### Universal Checksum Value: 
+```(0xFF - (sum(packett[:7]) & 0xFF)) & 0xFF```
 
 If the checksum is not correct, the keyboard will go black.
 
 ---
 
 ## BYTES TO CLEAR PREVIOUS MODES
-   ```
-   [0x88,0x00,0x00,0x00,0x00,0x00,0x00,0x77]
-   [0xb1,0x00,0x00,0x00,0x00,0x00,0x00,0x4e]
-   [0x08,0x02,0x00,0x00,0x00,0x00,0x00,0xf5]
-   [0x14,0x00,0x00,0x00,0x00,0x00,0x00,0xeb]
-   ```
+   
+   ```[0x88,0x00,0x00,0x00,0x00,0x00,0x00,0x77]``` \
+   ```[0xb1,0x00,0x00,0x00,0x00,0x00,0x00,0x4e]``` \
+   ```[0x08,0x02,0x00,0x00,0x00,0x00,0x00,0xf5]``` \
+   ```[0x14,0x00,0x00,0x00,0x00,0x00,0x00,0xeb]``` \
+   
 --- 
 
-## NON STATIC MODES
-
-**General formula for non static modes:** ```08 02 MM SS BB FF 00 CS``` where: 
+## NON STATIC MODES 
+**General formula for non static modes:** 08 02 MM SS BB FF 00 CS where: 
 - MM is mode (see below for modes)
 - SS is speed (from 01-09 in odd intervals; 01 being the fastest and 09 being slowest)
 - BB is brightness (from 01-32; 01 being off, 32 being max brightness)
-- FF is a flag (either 00 or e0, only certain modes need it)
-- CS is the checksum 
+- FF is unkown, but it is most likely a flag. Set to ```00``` unless otherwise observed for specific mode. 
+- CS is the checksum
 
-**Modes:** \
-Breathing:  ```02``` \
-Dazzling:   ```2a``` \
-Disco:      ```2f``` \
-Fireball:   ```27``` \
-Light Show: ```32``` \
-Ping Pong:  ```30``` \
-Racing:     ```2d``` \
-Rain Drop:  ```0a``` \
-Ripple:     ```06``` \
-Snake:      ```05``` \
-Sprouting:  ```2e``` \
-Swiping:    ```2c``` \
-Wave:       ```31``` 
-
-
+|   Mode   | Byte |
+|----------|------|
+| Breathing| 02 |
+| Dazzling |   2a |
+| Disco    |   2f |
+| Fireball |   27 |
+| Light Show| 32 |
+| Ping Pong|  30 |
+| Racing   |  2d |
+| Rain Drop|  0a |
+| Ripple   |   06 |
+| Snake    |   05 |
+| Sprouting|  2e |
+| Swiping  |  2c |
+| Wave     |   31 |
 ## STATIC MODE
-
-**General formula for static modes:**  ```14 00 00 RR GG BB 00 CS``` where: 
+**General formula for static modes:**  14 00 00 RR GG BB 00 CS where: 
 - RR is red brightness (from 00-FF)
 - GG is green brightness (from 00-FF)
 - BB is blue brightness (from 00-FF)
 - CS is checksum \
 Notes: \
 There is no official brightness control as the app within windows just lowers each rgb value accordingly.
-
+## per key info here
 ## 30 SECOND KEYBOARD TIMEOUT
-
-On:         ```30 01 01 00 00 00 00 cd``` \
-Off:        ```30 01 00 00 00 00 00 ce```
-
+On:         30 01 01 00 00 00 00 cd \
+Off:        30 01 00 00 00 00 00 ce
 ## Quirks:
-
-Brightness higher than ```32```, or 50 in decimal format, will change the colors in very funny ways. It is extremely similar to how Tetris on the NES will shift colors after a certain amount of levels, but it is not caused the same way ):
-
+Brightness higher than 32, or 50 in decimal format, will change the colors in very funny ways. It is extremely similar to how Tetris on the NES will shift colors after a certain amount of levels, but it is not caused the same way ):
 ---
-
 Speed higher than 09 will effectively become a standstill.
 
 </details>
