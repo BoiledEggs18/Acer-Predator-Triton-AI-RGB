@@ -43,18 +43,19 @@ If the checksum is not correct, the keyboard will not apply any changes.
    
 --- 
 
+
 ## NON STATIC MODES 
 
 ### General formula for non static modes 
-```08 02 MM SS BB FF 00 CS```
----
+**```08 02 MM SS BB FF 00 CS```**
+
 Where:
 - MM is mode (see table below)
 - SS is speed (Values range from 01 to 09, 01 being the fastest and 09 being slowest)
 - BB is brightness (from 01-32; 01 being off, 32 being max brightness)
-- FF is unkown, but is likely a flag. Set to ```00``` unless otherwise observed for specific mode (see table below) 
+- FF is unknown, but likely a flag. Set to ```00``` unless otherwise observed for specific mode (see table below) 
 - CS is the checksum
-----
+
 |   Mode   | Byte | Flag |
 |----------|------|------|
 | Breathing|  02  |  e0  |
@@ -71,27 +72,68 @@ Where:
 | Swiping  |  2c  |  00  |
 | Wave     |  31  |  00  |
 
+--- 
+
 ## STATIC MODE
 
 ### General formula for static modes
-```14 00 00 RR GG BB 00 CS```  
----
+**```14 00 00 RR GG BB 00 CS```**  
+
 Where:
 - RR is red brightness (from 00-FF)
 - GG is green brightness (from 00-FF)
 - BB is blue brightness (from 00-FF)
 - CS is checksum 
 
-## per key info here
+---
+
+## STATIC PER-KEY MODE
+
+### Control Process
+```88 00 00 00 00 00 00 77``` -- Clear previous modes (see notes and quirks)
+
+```12 00 00 08 00 00 00 e5``` -- Enter custom per-key mode/prepare for 512 Byte array
+
+*512 Byte framebuffer*        -- See the next section for layout and formula
+
+```08 02 33 05 32 08 01 82``` -- Apply changes from 512 bytes. Byte 4 (```32```) is brightness.
+
+
+### Framebuffer Layout
+Each key gets 4 bytes: ```00 RR GG BB```. Only 408 bytes of the 512 are used, while the rest are empty.
+
+There are 6 rows and 17 columns, however the layout is column-by-column, not row by row. 
+
+This means the structure looks like: ```<ESCAPE_BYTES> <TILDE_BYTES> <TAB_BYTES> <CAPS_BYTES> <SHIFT_BYTES> <CTRL_BYTES> <F1_BYTES> <1_BYTES> <Q_BYTES> ...```
+
+Therefore, this formula can be used to find the location of the first key's bytes in the array: ```location = 1 + (COLUMN · 24) + (ROW · 4)``` \
+Where: **COLUMN** is the column from 0-16 and **ROW** is the row from 0-5
+
+Below is a helpful table of the keys found in each row (Keyboard is standard US English layout):
+|Row|         Keys         |
+|---|----------------------|
+| 0 |ESC, F1-F12, Hotkey, Print Screen, Delete, Power |
+| 1 | ` through Backspace  |
+| 2 |     Tab through \    |
+| 3 |  Caps through Enter  |
+| 4 | LShift through RShift|
+| 5 | Ctrl through RArrow  |
+
+### Example: 
+To set the power button to white, set the 3 bytes following ```1 + (16 · 24) + (0 · 4)``` (the 385th byte) to ```FF```  
 
 
 ## 30 SECOND KEYBOARD TIMEOUT
 
-**On:         ```30 01 01 00 00 00 00 cd```**
+**On:         ```30 01 01 00 00 00 00 cd```** \
 **Off:        ```30 01 00 00 00 00 00 ce```**
 
 # Notes and Quirks
- - For static modes, there is no direct support for brightness. In Windows, it will just lower each value of red, green, and blue accordingly. 
+ - Per-key mode **MUST** use the ```write()``` function on **the 512 Byte packet only** or it will not apply. All other 8 Byte packets (which includes other modes) should use ```send_feature_report``` instead.
+ - In per-key mode, the apply changes packet (```08 02 33 05 32 08 01 82```) is the only observed case where bytes 5 and 6 use values other than ```e0``` or ```00```; their purpose is unknown.
+ - In per-key mode, there will occasionally be locations that do not light a key. This is to ensure the furthermost right key is always on the 17th column regardless of the amount of keys on the row.
+ - For static mode, there is no direct support for brightness. In Windows, it will just lower each value of red, green, and blue accordingly.
+ - As stated in impressions, bytes to clear previous modes are not always necessary. Inclusion is a precaution because replication of the necessity is not consistent.
  - When brightness is brought to a value higher than ``0x32`` (or 50), the color palette will change. The source of these color palettes are unknown and are **not** found on clean 32 byte intervals.
  - When speed is brought to a higher value than 09, it will effectively become a standstill. Occasionally, there will be "islands of stability" where the speed appears to return to normal, but **more testing is needed to find the exact behavior.**
 
@@ -109,7 +151,7 @@ Change the r, g, and b variables in clrchange.py to desired values **in hex form
 - [x] Support modes other than static
 - [x] Speed control for other modes
 - [x] Brightness control within the app
-- [ ] Support individual keys
+- [x] Support individual keys
 - [ ] Make this easier to control (likely a tui)
 - [ ] Make this a daemon (so rgb can turn off/on from sleep/wake events)
 - [ ] Complete compatability guide for Acer Triton Ai laptops
