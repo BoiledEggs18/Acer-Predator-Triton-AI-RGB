@@ -62,7 +62,7 @@ Where:
 | Dazzling |  2a  |  e0  |
 | Disco    |  2f  |  00  |   
 | Fireball |  27  |  e0  |
-| LightShow|  32  |  00  |
+| Light Show|  32  |  00  |
 | Ping Pong|  30  |  00  |
 | Racing   |  2d  |  00  |
 | Rain Drop|  0a  |  e0  |
@@ -146,13 +146,21 @@ To set the power button to white, set the 3 bytes following ```1 + (16 · 24) + 
 > This is currently a very early proof of concept and is still in development, so unexpected things may happen
 
 ## Usage
-Change the r, g, and b variables in clrchange.py to desired values **in hex format** and run (very crude but **WILL** change)
+
+ - Download and run ```main.py``` 
+ - Choose RGB device, then select a mode.
+
+**You must select your device PRIOR to changing RGB** \
+I plan on adding a config file at a later point in time so that this wouldn't be necessary on every run time. 
+
+Currently, per-key support has not been implemented, but the protocol is known.
+
 ## Road Map/Future Plans
 - [x] Support modes other than static
 - [x] Speed control for other modes
 - [x] Brightness control within the app
-- [x] Support individual keys
-- [ ] Make this easier to control (likely a tui)
+- [x] Support individual keys (only needs implementation)
+- [x] Make this easier to control (likely a tui)
 - [ ] Make this a daemon (so rgb can turn off/on from sleep/wake events)
 - [ ] Complete compatability guide for Acer Triton Ai laptops
 - [ ] Support changing the lights found on the touchpad 
