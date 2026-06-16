@@ -37,6 +37,8 @@ non_static_modes_unflagged = {
     "wave": 0x31,
 }
 
+dev = None
+
 def checksum(packet):
     return (0xff - (sum(packet[:7]) & 0xff)) & 0xff
 
@@ -65,22 +67,26 @@ def reset_device():
     try:
         send_packets(reset_packets)
     except:
-        print("Something bad happened (your device was not found). Please try selecting your device again.\n Aborting now...")
+        print("Something bad happened (likely your device was not found). Please try selecting your device again.\n Aborting now...")
         exit()
 
 def find_device():
+    global dev
 #    print("This action is only necessary once. \n") ~~~ this is not currently true ):
-    print("Below is a list of your HID Devices. They may all look the exact same, but one is your keybaord's rgb controller. \nIf you are unsure, try selecting one; if your keyboard doesn't go black, select another one.")
+    print("Below is a list of your HID Devices; please choose your RGB controller. \nIf you are unsure, try selecting one; if your keyboard doesn't go black, select another one.")
     print("\nWARNING: Your keyboard may become unresponsive if you chose the keyboard. This is only temporary; if this happens, simply choose another device.\n")
-    
+
     time.sleep(3)
 
     devices = hid.enumerate()
-    global dev
-    dev = hid.device()
+    try:
+        dev = hid.device()
+    except:
+        print("Please use python-hidapi instead of python-hid \nExiting now...")
+        exit()
 
     if not devices: 
-        print("No HID devices found. Ensure python-hid is installed and that your laptop is supported.")
+        print("No HID devices found. Ensure python-hidapi is installed and that your laptop is supported.")
         exit()
 
     for i, device in enumerate(devices,1):
@@ -90,10 +96,16 @@ def find_device():
     while True:
         try:
             cdev = int(input("Select a device by interface number (usually interface 3): "))
-            kbdpath = devices[cdev]['path'] 
+            matches = [d for d in devices if d['interface_number'] == cdev]
+            if not matches:
+                print("No device found with that interface number.")
+                continue
+            kbdpath = matches[0]['path'] 
             dev.open_path(kbdpath) 
-        except:
-            print("Invalid input. Please enter a valid interface number.")
+        except Exception as e:
+            print(f"Error: {e}")
+            print("If the error is 'open failed', please try running again with sudo. A fix is planned")
+#            print("Invalid input. Please enter a valid interface number."
             continue
 
         reset_device()
