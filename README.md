@@ -2,7 +2,7 @@
 ## Background
 Currently, this repo serves as my documentation of Acer's Keyboard RGB protocal which was found by reverse engineering. This also serves as a proof of concept for other laptops and **WILL** be developed into an app later.
 
-This was all tested with an Acer Predator Triton 14 AI (PT14-52T) under Fedora Linux 44, but it should work across distros since it only uses HID calls, which also means that this works without super user privileges!
+This was all tested with an Acer Predator Triton 14 AI (PT14-52T) under Fedora Linux 44 and Arch Linux, but it should work across distros since it only uses HID calls, which also means that this (usually) works without super user privileges!
 
 RGB is (officially) supported on Windows 11 only, so there are several unsupported features under Linux. [Jafar Akhondali](https://github.com/JafarAkhondali/acer-predator-turbo-and-rgb-keyboard-linux-module), [0x7375646](https://github.com/0x7375646F/Linuwu-Sense), and [fcrespo82](https://github.com/fcrespo82/acer-lighting-daemon) attempt so solve these issues, but they do not fully support this laptop, so I decided to make my own project that aims to support it. 
 
@@ -145,7 +145,13 @@ To set the power button to white, set the 3 bytes following ```1 + (16 · 24) + 
 > [!warning]
 > This is currently a very early proof of concept and is still in development, so unexpected things may happen
 
-## Usage
+
+### Pre-requisites
+ 
+ - Python
+ - Python-hidapi
+
+### Usage
 
  - Download and run ```main.py``` 
  - Choose RGB device, then select a mode.
