@@ -6,7 +6,7 @@ This was all tested with an Acer Predator Triton 14 AI (PT14-52T) under Fedora L
 
 RGB is (officially) supported on Windows 11 only, so there are several unsupported features under Linux. [Jafar Akhondali](https://github.com/JafarAkhondali/acer-predator-turbo-and-rgb-keyboard-linux-module), [0x7375646](https://github.com/0x7375646F/Linuwu-Sense), and [fcrespo82](https://github.com/fcrespo82/acer-lighting-daemon) attempt so solve these issues, but they do not fully support this laptop, so I decided to make my own project that aims to support it. 
 
-This will also serve as a compatability guide for other PT14-52T laptops since there is many things that did not work out of the box (but had community patches or workarounds!)
+A complete compatability guide can be found at _coming soon._
 
 ---
 
@@ -23,7 +23,7 @@ When sending packets, each packet requires a leading zero byte, which can be sen
 
 Sometimes, the controller needs to clear the previous modes for it to change. During my testing, I was unable to reliably replicate the conditions where this was necessary. I have had the highest success rate when repeatedly inputting incorrect modes or wrong checksums, but it was never 100%. The packets in question were pulled directly from Wireshark.
 
-It seems the keyboard is the only thing that uses USB HID to control RGB, but since it is HID, there is no root access needed. The modes I have found are listed below.
+It seems the keyboard is the only thing that uses USB HID to control RGB, but since it is HID, there is no root access needed unless the operating system exposes raw hid devices in /dev/hidraw*. The modes I have found are listed below.
 
 ---
 
@@ -130,7 +130,7 @@ To set the power button to white, set the 3 bytes following ```1 + (16 · 24) + 
 
 # Notes and Quirks
  - Per-key mode **MUST** use the ```write()``` function on **the 512 Byte packet only** or it will not apply. All other 8 Byte packets (which includes other modes) should use ```send_feature_report``` instead.
- - In per-key mode, the apply changes packet (```08 02 33 05 32 08 01 82```) is the only observed case where bytes 5 and 6 use values other than ```e0``` or ```00```; their purpose is unknown.
+ - In per-key mode, the packet that applies changes (```08 02 33 05 32 08 01 82```) is the only observed case where bytes 5 and 6 use values other than ```e0``` or ```00```; their purpose is unknown.
  - In per-key mode, there will occasionally be locations that do not light a key. This is to ensure the furthermost right key is always on the 17th column regardless of the amount of keys on the row.
  - For static mode, there is no direct support for brightness. In Windows, it will just lower each value of red, green, and blue accordingly.
  - As stated in impressions, bytes to clear previous modes are not always necessary. Inclusion is a precaution because replication of the necessity is not consistent.
@@ -168,6 +168,6 @@ Currently, per-key support has not been implemented, but the protocol is known.
 - [x] Support individual keys (only needs implementation)
 - [x] Make this easier to control (likely a tui)
 - [ ] Make this a daemon (so rgb can turn off/on from sleep/wake events)
-- [ ] Complete compatability guide for Acer Triton Ai laptops
+- [ ] ~~Complete compatability guide for Acer Triton Ai laptops~~ Not planned on this repo, will include links when complete
 - [ ] Support changing the lights found on the touchpad 
 - [ ] Support (really integrate) all other rgb lights found elsewhere (there already exists slightly broken support from [acer-lighting-daemon](https://github.com/fcrespo82/acer-lighting-daemon), but i may have to fix it, and I will attempt to include controls for it)
